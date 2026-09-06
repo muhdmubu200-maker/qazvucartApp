@@ -66,6 +66,17 @@ class _WebViewScreenState extends State<WebViewScreen> {
           },
           onWebResourceError: (error) {
             debugPrint('WebView error: ${error.description}');
+
+            // Android throws this when going back to a page that was
+            // originally the result of a POST request (login, checkout,
+            // add-to-cart, etc). The fix is to reload rather than treat
+            // it as a real connectivity/server error.
+            if (error.description.contains('ERR_CACHE_MISS')) {
+              _timeoutTimer?.cancel();
+              _controller.reload();
+              return;
+            }
+
             if (_isMainFrameError(error)) {
               _showOfflinePage();
             }
