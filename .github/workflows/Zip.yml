@@ -27,6 +27,15 @@ jobs:
           # Optional: Remove the zip after extraction so it's not in the repo twice
           # rm $ZIP_FILE 
 
+      - name: Fix permissions
+        run: |
+          # k.zip can carry restrictive Unix permissions on some entries
+          # (e.g. .metadata), which unzip preserves on extraction and which
+          # then makes "git add" fail with "Permission denied". Reset
+          # ownership/read/write for the runner user without touching
+          # execute bits that legitimately need to stay (e.g. gradlew).
+          chmod -R u+rwX .
+
       - name: Commit and Push changes
         run: |
           git config --global user.name "github-actions[bot]"
